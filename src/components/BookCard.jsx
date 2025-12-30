@@ -22,7 +22,7 @@ export default function BookCard({ book, mode, onClick }) {
   }, [book.id]);
 
   const toggleFavorite = (e) => {
-    e.stopPropagation(); // Evita abrir el detalle al hacer clic en favorito
+    e.stopPropagation();
     const favorites = JSON.parse(localStorage.getItem('book-favorites') || '[]');
     if (isFavorite) {
       const filtered = favorites.filter((fav) => fav.id !== book.id);
@@ -48,8 +48,24 @@ export default function BookCard({ book, mode, onClick }) {
     <motion.div
       layout
       whileHover={{ y: -6 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      style={{ cursor: 'pointer' }}
+      tabIndex={0}
+      role="button"
+      aria-label={`Ver detalles del libro: ${title}, por ${authors}`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onClick();
+        }
+      }}
+      style={{ cursor: 'pointer', outline: 'none' }}
+      sx={{
+        '&:focus-visible': {
+          outline: `2px solid ${mode === 'light' ? '#2563eb' : '#60a5fa'}`,
+          outlineOffset: '2px',
+          borderRadius: '20px',
+        },
+      }}
     >
       <Card
         sx={{
@@ -57,6 +73,8 @@ export default function BookCard({ book, mode, onClick }) {
           flexDirection: 'column',
           height: '100%',
           position: 'relative',
+          borderRadius: '20px',
+          border: `1px solid ${mode === 'light' ? '#e2e8f0' : '#334155'}`,
           transition: 'box-shadow 0.3s',
           '&:hover': {
             boxShadow: mode === 'light'
@@ -76,6 +94,7 @@ export default function BookCard({ book, mode, onClick }) {
                 backdropFilter: 'blur(8px)',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
               }}
+              aria-label={isFavorite ? `Quitar ${title} de favoritos` : `Añadir ${title} a favoritos`}
             >
               {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
             </IconButton>
@@ -84,9 +103,9 @@ export default function BookCard({ book, mode, onClick }) {
 
         <CardMedia
           component="img"
-          image={image || 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover'}
-          alt={title}
-          onError={(e) => (e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover')}
+          image={image || 'https://placehold.co/400x600/e2e8f0/64748b?text=Portada+no+disponible'}
+          alt={`Portada del libro: ${title}`}
+          onError={(e) => (e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=Portada+no+disponible')}
           sx={{
             height: 260,
             objectFit: 'cover',
