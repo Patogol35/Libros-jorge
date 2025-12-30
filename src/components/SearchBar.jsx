@@ -11,7 +11,7 @@ export default function SearchBar({ onSearch }) {
   const [options, setOptions] = useState([]);
   const [open, setOpen] = useState(false);
 
-  // Autocompletado: se mantiene
+  // Autocompletado
   useEffect(() => {
     if (inputValue.length < 2) {
       setOptions([]);
@@ -24,6 +24,7 @@ export default function SearchBar({ onSearch }) {
         const suggestions = (res.data.items || []).map((item) => ({
           label: `${item.volumeInfo.title || 'Sin título'}${item.volumeInfo.authors ? ' – ' + item.volumeInfo.authors[0] : ''}`,
           value: item.volumeInfo.title || inputValue,
+          raw: item, // ← Guardamos el libro completo para usarlo al seleccionar
         }));
         setOptions(suggestions);
       } catch (err) {
@@ -40,10 +41,19 @@ export default function SearchBar({ onSearch }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Permitir búsqueda incluso si está vacío (aunque no hará nada)
-    // Pero el botón siempre está habilitado visualmente
     if (inputValue.trim()) {
       onSearch(inputValue);
+    }
+  };
+
+  // ✅ Nueva función: al seleccionar una opción del autocompletado → buscar inmediatamente
+  const handleAutocompleteChange = (event, value) => {
+    if (value && value.raw) {
+      // Si es un objeto de sugerencia (con "raw"), buscamos por el título
+      onSearch(value.raw.volumeInfo.title);
+    } else if (typeof value === 'string') {
+      // Si es texto libre
+      setInputValue(value);
     }
   };
 
@@ -68,12 +78,15 @@ export default function SearchBar({ onSearch }) {
         onClose={() => setOpen(false)}
         options={options}
         inputValue={inputValue}
-        onInputChange={(e, newInput) => setInputValue(newInput)}
+        onInputChange={(e, newInput) => {
+          setInputValue(newInput);
+        }}
+        onChange={handleAutocompleteChange} // ✅ ¡Esto hace la magia!
         sx={{ width: '100%', maxWidth: 500 }}
         renderInput={(params) => (
           <TextField
             {...params}
-            placeholder="Ej: El nombre del viento, Dan Brown, 9780307474278..."
+            placeholder="Ej: El nombre del viento, Dan Brown..."
             variant="outlined"
             size="medium"
             InputProps={{
@@ -93,26 +106,18 @@ export default function SearchBar({ onSearch }) {
         variant="contained"
         size="medium"
         startIcon={<SearchIcon />}
-        // 🔑 ¡SIEMPRE habilitado visualmente!
-        // (aunque internamente no busque si está vacío)
         sx={{
           fontWeight: 600,
           borderRadius: '16px',
           whiteSpace: 'nowrap',
           px: 3,
           height: '56px',
-          bgcolor: '#2563eb', // Azul fijo
+          bgcolor: '#2563eb',
           color: '#ffffff',
           '&:hover': {
             bgcolor: '#1d4ed8',
             boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)',
           },
-          '&:active': {
-            bgcolor: '#1e40af',
-          },
-          // 🔸 Siempre visible, incluso si está vacío
-          opacity: 1,
-          pointerEvents: 'auto',
         }}
         aria-label={`Buscar libros con el término: ${inputValue || 'actual'}`}
       >
