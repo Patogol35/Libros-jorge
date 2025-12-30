@@ -1,5 +1,5 @@
 // src/components/SearchBar.jsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { TextField, Button, Box } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import axios from 'axios';
@@ -9,8 +9,6 @@ const API_BASE = 'https://www.googleapis.com/books/v1/volumes';
 export default function SearchBar({ onSearch }) {
   const [inputValue, setInputValue] = useState('');
   const [options, setOptions] = useState([]);
-  const [open, setOpen] = useState(false);
-  const inputRef = useRef(null);
 
   useEffect(() => {
     if (inputValue.length < 2) {
@@ -49,28 +47,38 @@ export default function SearchBar({ onSearch }) {
     <Box
       component="form"
       onSubmit={handleSubmit}
-      sx={{ display: 'flex', gap: 1.5, width: '100%', alignItems: 'center' }}
+      sx={{
+        display: 'flex',
+        gap: 2,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
       role="search"
       aria-label="Buscar libros por título, autor o ISBN"
     >
       <TextField
-        inputRef={inputRef}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         placeholder="Ej: El nombre del viento, Dan Brown..."
-        variant="standard"
+        variant="outlined"
+        size="medium"
+        sx={{
+          width: '100%',
+          maxWidth: 500,
+          bgcolor: 'background.paper',
+          borderRadius: '16px',
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '16px',
+          },
+        }}
         InputProps={{
-          disableUnderline: true,
           sx: {
-            py: 1.5,
-            px: 2,
             fontSize: '1.05rem',
-            bgcolor: 'transparent',
-            width: '100%',
+            pr: 1.5,
           },
         }}
         aria-label="Término de búsqueda para libros"
-        fullWidth
       />
       <Button
         type="submit"
@@ -80,9 +88,19 @@ export default function SearchBar({ onSearch }) {
         disabled={!inputValue.trim()}
         sx={{
           fontWeight: 600,
-          borderRadius: '12px',
+          borderRadius: '16px',
           whiteSpace: 'nowrap',
-          px: 2.5,
+          px: 3,
+          height: '56px', // Igualar altura con TextField
+          boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+          '&:hover': {
+            boxShadow: '0 6px 16px rgba(37, 99, 235, 0.4)',
+          },
+          '&:disabled': {
+            bgcolor: 'action.disabledBackground',
+            color: 'text.disabled',
+            boxShadow: 'none',
+          },
         }}
         aria-label={`Buscar libros con el término: ${inputValue || 'vacío'}`}
       >
