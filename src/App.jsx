@@ -9,6 +9,7 @@ import {
   CircularProgress,
   Alert,
   IconButton,
+  Paper,
 } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
@@ -48,26 +49,31 @@ export default function App() {
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', py: { xs: 4, sm: 6, md: 8 } }}>
-        <Container>
-          <Box textAlign="center" mb={6} position="relative">
-            <IconButton
-              onClick={toggleColorMode}
-              sx={{
-                position: 'absolute',
-                right: 0,
-                top: { xs: -50, sm: -60 },
-                bgcolor: 'background.paper',
-                boxShadow: 2,
-                '&:hover': {
-                  bgcolor: 'background.paper',
-                  boxShadow: 4,
-                },
-              }}
-            >
-              {muiTheme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-            </IconButton>
+      <Box sx={{ minHeight: '100vh', position: 'relative', pb: 6 }}>
+        {/* Botón de modo oscuro/claro - flotante, visible y completo */}
+        <IconButton
+          onClick={toggleColorMode}
+          sx={{
+            position: 'fixed',
+            top: 24,
+            right: 24,
+            zIndex: 1200,
+            width: 48,
+            height: 48,
+            bgcolor: 'background.paper',
+            color: 'text.primary',
+            boxShadow: 3,
+            '&:hover': {
+              bgcolor: 'background.paper',
+              boxShadow: 6,
+            },
+          }}
+        >
+          {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+        </IconButton>
 
+        <Container sx={{ pt: 8 }}>
+          <Box textAlign="center" mb={6}>
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -76,32 +82,50 @@ export default function App() {
               <Typography
                 variant="h1"
                 sx={{
-                  fontSize: { xs: '2.2rem', sm: '2.8rem', md: '3.2rem' },
+                  fontSize: { xs: '2rem', sm: '2.6rem', md: '3rem' },
                   background: mode === 'light'
-                    ? 'linear-gradient(90deg, #1e40af, #0ea5e9)'
-                    : 'linear-gradient(90deg, #60a5fa, #93c5fd)',
+                    ? 'linear-gradient(120deg, #1d4ed8, #0ea5e9)'
+                    : 'linear-gradient(120deg, #7dd3fc, #bae6fd)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   fontWeight: 800,
-                  mb: 1,
+                  mb: 1.5,
                 }}
               >
                 BookFinder
               </Typography>
               <Typography
-                variant="h5"
+                variant="h6"
                 color="text.secondary"
-                sx={{ maxWidth: 600, mx: 'auto', px: 2 }}
+                sx={{ maxWidth: 600, mx: 'auto', px: 2, fontWeight: 400 }}
               >
-                Descubre, explora y guarda tus libros favoritos desde +40 millones de títulos.
+                Explora millones de libros y guarda tus favoritos.
               </Typography>
             </motion.div>
           </Box>
 
-          <SearchBar onSearch={handleSearch} />
+          {/* Buscador mejorado */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 8 }}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 1,
+                width: '100%',
+                maxWidth: 720,
+                borderRadius: '20px',
+                bgcolor: mode === 'light' ? '#ffffff' : '#1e293b',
+                border: `1px solid ${mode === 'light' ? '#e2e8f0' : '#334155'}`,
+                boxShadow: mode === 'light'
+                  ? '0 4px 20px rgba(0,0,0,0.06)'
+                  : '0 4px 20px rgba(0,0,0,0.15)',
+              }}
+            >
+              <SearchBar onSearch={handleSearch} />
+            </Paper>
+          </Box>
 
           {error && (
-            <Alert severity="error" sx={{ mb: 4 }}>
+            <Alert severity="error" sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
               {error}
             </Alert>
           )}
@@ -118,7 +142,7 @@ export default function App() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
+                  <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} justifyContent="center">
                     {books.map((book) => (
                       <Grid item xs={12} sm={6} md={4} lg={3} key={book.id}>
                         <BookCard book={book} mode={mode} />
@@ -140,8 +164,8 @@ export default function App() {
 
           {!hasSearched && (
             <Box textAlign="center" mt={8}>
-              <Typography variant="body1" color="text.secondary">
-                Escribe en la barra de búsqueda para comenzar.
+              <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500, mx: 'auto' }}>
+                Busca por título, autor o ISBN para comenzar.
               </Typography>
             </Box>
           )}
