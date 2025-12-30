@@ -10,9 +10,12 @@ import {
   Alert,
   IconButton,
   Paper,
+  Divider,
+  Link,
 } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 import SearchBar from './components/SearchBar';
 import BookCard from './components/BookCard';
@@ -29,12 +32,14 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null); // ← Nuevo estado
 
   const handleSearch = async (query) => {
     if (!query.trim()) return;
     setLoading(true);
     setError('');
     setHasSearched(true);
+    setSelectedBook(null); // ← Cerrar detalle al buscar
     try {
       const res = await axios.get(`${API_BASE}?q=${encodeURIComponent(query)}&maxResults=24`);
       setBooks(res.data.items || []);
@@ -46,11 +51,19 @@ export default function App() {
     }
   };
 
+  const handleSelectBook = (book) => {
+    setSelectedBook(book);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedBook(null);
+  };
+
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', position: 'relative', pb: 6 }}>
-        {/* Botón de modo oscuro/claro - flotante, visible y completo */}
+        {/* Botón de modo */}
         <IconButton
           onClick={toggleColorMode}
           sx={{
@@ -74,37 +87,31 @@ export default function App() {
 
         <Container sx={{ pt: 8 }}>
           <Box textAlign="center" mb={6}>
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+            <Typography
+              variant="h1"
+              sx={{
+                fontSize: { xs: '2rem', sm: '2.6rem', md: '3rem' },
+                background: mode === 'light'
+                  ? 'linear-gradient(120deg, #1d4ed8, #0ea5e9)'
+                  : 'linear-gradient(120deg, #7dd3fc, #bae6fd)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontWeight: 800,
+                mb: 1.5,
+              }}
             >
-              <Typography
-                variant="h1"
-                sx={{
-                  fontSize: { xs: '2rem', sm: '2.6rem', md: '3rem' },
-                  background: mode === 'light'
-                    ? 'linear-gradient(120deg, #1d4ed8, #0ea5e9)'
-                    : 'linear-gradient(120deg, #7dd3fc, #bae6fd)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  fontWeight: 800,
-                  mb: 1.5,
-                }}
-              >
-                BookFinder
-              </Typography>
-              <Typography
-                variant="h6"
-                color="text.secondary"
-                sx={{ maxWidth: 600, mx: 'auto', px: 2, fontWeight: 400 }}
-              >
-                Explora millones de libros y guarda tus favoritos.
-              </Typography>
-            </motion.div>
+              BookFinder
+            </Typography>
+            <Typography
+              variant="h6"
+              color="text.secondary"
+              sx={{ maxWidth: 600, mx: 'auto', px: 2, fontWeight: 400 }}
+            >
+              Explora millones de libros y descubre sus detalles.
+            </Typography>
           </Box>
 
-          {/* Buscador mejorado */}
+          {/* Buscador */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 8 }}>
             <Paper
               elevation={0}
@@ -130,47 +137,175 @@ export default function App() {
             </Alert>
           )}
 
-          {loading ? (
-            <Box display="flex" justifyContent="center" my={10}>
-              <CircularProgress size={48} />
-            </Box>
-          ) : (
-            <AnimatePresence>
-              {books.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+          {/* Vista de detalle del libro */}
+          {selectedBook && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              style={{ maxWidth: 900, mx: 'auto', mb: 8 }}
+            >
+              <Paper
+                sx={{
+                  p: 4,
+                  borderRadius: '24px',
+                  bgcolor: 'background.paper',
+                  position: 'relative',
+                }}
+              >
+                <IconButton
+                  onClick={handleCloseDetail}
+                  sx={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    bgcolor: 'background.default',
+                    '&:hover': { bgcolor: 'divider' },
+                  }}
                 >
-                  <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} justifyContent="center">
-                    {books.map((book) => (
-                      <Grid item xs={12} sm={6} md={4} lg={3} key={book.id}>
-                        <BookCard book={book} mode={mode} />
-                      </Grid>
-                    ))}
+                  <CloseIcon />
+                </IconButton>
+
+                <Grid container spacing={4}>
+                  <Grid item xs={12} md={4}>
+                    <Box
+                      component="img"
+                      src={
+                        selectedBook.volumeInfo.imageLinks?.thumbnail
+                          ? selectedBook.volumeInfo.imageLinks.thumbnail.replace('http://', 'https://')
+                          : 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover'
+                      }
+                      onError={(e) => (e.currentTarget.src = 'https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover')}
+                      alt={selectedBook.volumeInfo.title}
+                      sx={{
+                        width: '100%',
+                        borderRadius: '16px',
+                        boxShadow: 3,
+                      }}
+                    />
                   </Grid>
-                </motion.div>
+                  <Grid item xs={12} md={8}>
+                    <Typography variant="h4" fontWeight={700} gutterBottom>
+                      {selectedBook.volumeInfo.title}
+                    </Typography>
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      {selectedBook.volumeInfo.authors?.join(', ') || 'Autor desconocido'}
+                    </Typography>
+
+                    <Box mt={2} mb={3}>
+                      <Typography variant="body1" paragraph>
+                        {selectedBook.volumeInfo.description
+                          ? selectedBook.volumeInfo.description.replace(/<[^>]*>/g, '')
+                          : 'Sin descripción disponible.'}
+                      </Typography>
+                    </Box>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    <Grid container spacing={1}>
+                      {selectedBook.volumeInfo.publishedDate && (
+                        <Grid item xs={12} sm={6}>
+                          <Typography variant="body2" color="text.secondary">
+                            <strong>Fecha de publicación:</strong> {selectedBook.volumeInfo.publishedDate}
+                          </Typography>
+                        </Grid>
+                      )}
+                      {selectedBook.volumeInfo.pageCount && (
+                        <Grid item xs={12} sm={6}>
+                          <Typography variant="body2" color="text.secondary">
+                            <strong>Páginas:</strong> {selectedBook.volumeInfo.pageCount}
+                          </Typography>
+                        </Grid>
+                      )}
+                      {selectedBook.volumeInfo.categories?.[0] && (
+                        <Grid item xs={12}>
+                          <Typography variant="body2" color="text.secondary">
+                            <strong>Categoría:</strong> {selectedBook.volumeInfo.categories.join(', ')}
+                          </Typography>
+                        </Grid>
+                      )}
+                      {selectedBook.volumeInfo.industryIdentifiers?.length > 0 && (
+                        <Grid item xs={12}>
+                          <Typography variant="body2" color="text.secondary">
+                            <strong>ISBN:</strong>{' '}
+                            {selectedBook.volumeInfo.industryIdentifiers
+                              .map(id => `${id.type}: ${id.identifier}`)
+                              .join(', ')}
+                          </Typography>
+                        </Grid>
+                      )}
+                    </Grid>
+
+                    {/* Enlace de vista previa si existe */}
+                    {selectedBook.volumeInfo.previewLink && (
+                      <Box mt={3}>
+                        <Link
+                          href={selectedBook.volumeInfo.previewLink}
+                          target="_blank"
+                          rel="noopener"
+                          underline="hover"
+                          sx={{ fontWeight: 600, color: 'primary.main' }}
+                        >
+                          👁️ Ver vista previa (Google Books)
+                        </Link>
+                      </Box>
+                    )}
+                  </Grid>
+                </Grid>
+              </Paper>
+            </motion.div>
+          )}
+
+          {/* Lista de libros */}
+          {!selectedBook && (
+            <>
+              {loading ? (
+                <Box display="flex" justifyContent="center" my={10}>
+                  <CircularProgress size={48} />
+                </Box>
+              ) : (
+                <AnimatePresence>
+                  {books.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} justifyContent="center">
+                        {books.map((book) => (
+                          <Grid item xs={12} sm={6} md={4} lg={3} key={book.id}>
+                            <BookCard
+                              book={book}
+                              mode={mode}
+                              onClick={() => handleSelectBook(book)}
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               )}
-            </AnimatePresence>
-          )}
 
-          {!loading && !error && books.length === 0 && hasSearched && (
-            <Box textAlign="center" mt={8}>
-              <Typography variant="h6" color="text.secondary">
-                No encontramos libros con esa búsqueda 😕
-              </Typography>
-            </Box>
-          )}
+              {!loading && !error && books.length === 0 && hasSearched && (
+                <Box textAlign="center" mt={8}>
+                  <Typography variant="h6" color="text.secondary">
+                    No encontramos libros con esa búsqueda 😕
+                  </Typography>
+                </Box>
+              )}
 
-          {!hasSearched && (
-            <Box textAlign="center" mt={8}>
-              <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500, mx: 'auto' }}>
-                Busca por título, autor o ISBN para comenzar.
-              </Typography>
-            </Box>
+              {!hasSearched && (
+                <Box textAlign="center" mt={8}>
+                  <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500, mx: 'auto' }}>
+                    Busca por título, autor o ISBN para comenzar.
+                  </Typography>
+                </Box>
+              )}
+            </>
           )}
         </Container>
       </Box>
     </ThemeProvider>
   );
-}
+                        }
