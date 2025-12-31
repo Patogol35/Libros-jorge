@@ -17,12 +17,7 @@ export default function App() {
   const theme = createTheme({
     palette: {
       mode,
-      primary: {
-        main: "#2563eb",
-      },
-    },
-    shape: {
-      borderRadius: 8,
+      primary: { main: "#1976d2" },
     },
     typography: {
       fontFamily: "Inter, Roboto, sans-serif",
