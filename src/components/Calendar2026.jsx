@@ -63,11 +63,17 @@ export default function Calendar2026() {
   const [selectedDay, setSelectedDay] = useState(null);
 
   const year = 2026;
-  const today = new Date();
+
+  // 👉 FECHA BASE DEL TITULO (SIEMPRE DIA 1 DEL MES)
+  const calendarDate = new Date(year, month, 1);
+
   const calendar = getCalendar(year, month);
 
-  const dayName = today.toLocaleDateString("es-ES", { weekday: "long" });
-  const monthName = MONTHS[today.getMonth()];
+  const dayName = calendarDate.toLocaleDateString("es-ES", {
+    weekday: "long",
+  });
+
+  const monthName = MONTHS[month];
 
   return (
     <Box>
@@ -110,14 +116,14 @@ export default function Calendar2026() {
           }}
         >
           <Typography sx={{ textTransform: "capitalize", opacity: 0.9 }}>
-            {dayName} · {today.getDate()}
+            {dayName} · 1
           </Typography>
           <Typography variant="h5" fontWeight={800}>
             {monthName} {year}
           </Typography>
         </Box>
 
-        {/* MES */}
+        {/* SELECTOR MES */}
         <Box
           display="flex"
           alignItems="center"
@@ -131,7 +137,10 @@ export default function Calendar2026() {
 
           <Select
             value={month}
-            onChange={(e) => setMonth(e.target.value)}
+            onChange={(e) => {
+              setMonth(e.target.value);
+              setSelectedDay(null);
+            }}
             size="small"
             sx={{ fontWeight: 600, minWidth: 160 }}
           >
@@ -197,7 +206,6 @@ export default function Calendar2026() {
                 const col = index % 7;
                 const isSaturday = col === 5;
                 const isSunday = col === 6;
-                const isToday = isSameDate(year, month, day, today);
                 const isSelected = day === selectedDay;
 
                 const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -220,10 +228,8 @@ export default function Calendar2026() {
                             cursor: "pointer",
                             bgcolor: isSelected
                               ? theme.palette.primary.dark
-                              : isToday
-                              ? theme.palette.primary.main
                               : "transparent",
-                            color: isSelected || isToday
+                            color: isSelected
                               ? "#fff"
                               : isSunday
                               ? theme.palette.error.main
@@ -232,15 +238,12 @@ export default function Calendar2026() {
                               : theme.palette.text.primary,
                             transition: "all .2s",
                             "&:hover": {
-                              bgcolor:
-                                isSelected || isToday
-                                  ? undefined
-                                  : theme.palette.action.hover,
+                              bgcolor: theme.palette.action.hover,
                             },
                           }}
                         >
                           <Typography fontSize={14}>{day}</Typography>
-                          <CalendarMonthIcon sx={{ fontSize: 13, opacity: 0.8 }} />
+                          <CalendarMonthIcon sx={{ fontSize: 13, opacity: 0.7 }} />
                         </Box>
                       </Tooltip>
                     )}
@@ -253,4 +256,4 @@ export default function Calendar2026() {
       </Paper>
     </Box>
   );
-      }
+        }
