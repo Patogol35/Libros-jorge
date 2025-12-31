@@ -64,14 +64,35 @@ export default function Calendar2026() {
 
   return (
     <Box>
-      {/* TITULO */}
-      <Typography variant="h3" fontWeight={800} textAlign="center" mb={1}>
-        Calendario
-      </Typography>
+      {/* TITULO MEJORADO */}
+      <Box textAlign="center" mb={5}>
+        <Typography
+          variant="h3"
+          fontWeight={900}
+          letterSpacing={1}
+        >
+          Calendario
+        </Typography>
 
-      <Typography textAlign="center" color="text.secondary" mb={4}>
-        Autor: Jorge Patricio Santamaría Cherrez
-      </Typography>
+        <Box
+          sx={{
+            width: 80,
+            height: 3,
+            bgcolor: "#2563eb",
+            mx: "auto",
+            my: 1.5,
+            borderRadius: 2,
+          }}
+        />
+
+        <Typography
+          fontSize={14}
+          color="text.secondary"
+          sx={{ letterSpacing: 0.5 }}
+        >
+          Autor · Jorge Patricio Santamaría Cherrez
+        </Typography>
+      </Box>
 
       <Paper
         elevation={10}
@@ -82,7 +103,7 @@ export default function Calendar2026() {
           overflow: "hidden",
         }}
       >
-        {/* HEADER AZUL (NO ANDROID) */}
+        {/* HEADER AZUL */}
         <Box
           sx={{
             background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
@@ -90,9 +111,7 @@ export default function Calendar2026() {
             p: 3,
           }}
         >
-          <Typography
-            sx={{ textTransform: "capitalize", opacity: 0.9 }}
-          >
+          <Typography sx={{ textTransform: "capitalize", opacity: 0.9 }}>
             {dayName} · {today.getDate()}
           </Typography>
           <Typography variant="h5" fontWeight={800}>
@@ -231,4 +250,4 @@ export default function Calendar2026() {
       </Paper>
     </Box>
   );
-}
+          }
