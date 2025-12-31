@@ -5,6 +5,8 @@ import {
   Typography,
   IconButton,
   Tooltip,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -110,21 +112,37 @@ export default function Calendar2026() {
           </Typography>
         </Box>
 
-        {/* MES */}
+        {/* MES (SELECTOR DIRECTO) */}
         <Box
           display="flex"
           alignItems="center"
           justifyContent="space-between"
           px={2}
           py={1.5}
+          gap={1}
         >
           <IconButton onClick={() => setMonth(m => (m === 0 ? 11 : m - 1))}>
             <ChevronLeftIcon />
           </IconButton>
 
-          <Typography fontWeight={600}>
-            {MONTHS[month]} {year}
-          </Typography>
+          <Select
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            size="small"
+            sx={{
+              minWidth: 160,
+              fontWeight: 600,
+              "& .MuiSelect-select": {
+                textAlign: "center",
+              },
+            }}
+          >
+            {MONTHS.map((m, i) => (
+              <MenuItem key={i} value={i}>
+                {m} {year}
+              </MenuItem>
+            ))}
+          </Select>
 
           <IconButton onClick={() => setMonth(m => (m === 11 ? 0 : m + 1))}>
             <ChevronRightIcon />
@@ -204,14 +222,11 @@ export default function Calendar2026() {
                             alignItems: "center",
                             justifyContent: "center",
                             cursor: "pointer",
-
-                            /* SOLO HOY Y SELECCIONADO */
                             bgcolor: isSelected
                               ? "#1e40af"
                               : isToday
                               ? "#2563eb"
                               : "transparent",
-
                             color: isSelected || isToday
                               ? "#fff"
                               : isSunday
@@ -219,7 +234,6 @@ export default function Calendar2026() {
                               : isSaturday
                               ? "#2563eb"
                               : "#1e293b",
-
                             fontWeight: 600,
                             transition: "all .2s",
                             "&:hover": {
@@ -244,4 +258,4 @@ export default function Calendar2026() {
       </Paper>
     </Box>
   );
-          }
+}
