@@ -5,41 +5,54 @@ import {
   Typography,
   IconButton,
   Grid,
-  Divider,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
-const months = [
+const MONTHS = [
   "Enero", "Febrero", "Marzo", "Abril",
   "Mayo", "Junio", "Julio", "Agosto",
   "Septiembre", "Octubre", "Noviembre", "Diciembre",
 ];
 
-const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const DAYS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-const getMonthData = (year, month) => {
-  const jsDay = new Date(year, month, 1).getDay();
-  const firstDay = jsDay === 0 ? 6 : jsDay - 1;
-  const totalDays = new Date(year, month + 1, 0).getDate();
-  return { firstDay, totalDays };
-};
+function getCalendar(year, month) {
+  const firstDay = new Date(year, month, 1).getDay(); // 0 = domingo
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const cells = [];
+
+  for (let i = 0; i < firstDay; i++) {
+    cells.push(null);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push(d);
+  }
+
+  return cells;
+}
 
 export default function Calendar2026() {
   const [month, setMonth] = useState(0);
   const year = 2026;
   const today = new Date();
 
-  const { firstDay, totalDays } = getMonthData(year, month);
+  const calendar = getCalendar(year, month);
 
   return (
     <Box>
       {/* TÍTULO */}
-      <Typography variant="h3" textAlign="center" fontWeight={800} mb={1}>
-        📅 Calendario 2026
+      <Typography
+        variant="h3"
+        textAlign="center"
+        fontWeight={800}
+        mb={1}
+      >
+        Calendario 2026
       </Typography>
 
-      {/* AUTOR */}
       <Typography
         textAlign="center"
         color="text.secondary"
@@ -51,25 +64,24 @@ export default function Calendar2026() {
       <Paper
         elevation={6}
         sx={{
-          p: 4,
           maxWidth: 900,
           mx: "auto",
-          border: "1px solid rgba(0,0,0,0.08)",
+          p: 4,
         }}
       >
-        {/* HEADER MES */}
+        {/* HEADER */}
         <Box
           display="flex"
           alignItems="center"
           justifyContent="space-between"
-          mb={2}
+          mb={3}
         >
           <IconButton onClick={() => setMonth(m => (m === 0 ? 11 : m - 1))}>
             <ChevronLeftIcon />
           </IconButton>
 
           <Typography variant="h4" fontWeight={700}>
-            {months[month]} {year}
+            {MONTHS[month]} {year}
           </Typography>
 
           <IconButton onClick={() => setMonth(m => (m === 11 ? 0 : m + 1))}>
@@ -77,58 +89,50 @@ export default function Calendar2026() {
           </IconButton>
         </Box>
 
-        <Divider sx={{ mb: 2 }} />
-
-        {/* DÍAS */}
-        <Grid container>
-          {days.map(day => (
-            <Grid item xs={12 / 7} key={day}>
+        {/* DAYS HEADER */}
+        <Grid container mb={1}>
+          {DAYS.map(d => (
+            <Grid item xs={12 / 7} key={d}>
               <Typography
-                textAlign="center"
+                align="center"
                 fontWeight={600}
                 color="text.secondary"
               >
-                {day}
+                {d}
               </Typography>
             </Grid>
           ))}
         </Grid>
 
-        {/* CALENDARIO */}
-        <Grid container mt={1}>
-          {[...Array(firstDay)].map((_, i) => (
-            <Grid item xs={12 / 7} key={`empty-${i}`} />
-          ))}
-
-          {[...Array(totalDays)].map((_, i) => {
-            const dayNumber = i + 1;
+        {/* CALENDAR GRID */}
+        <Grid container>
+          {calendar.map((day, index) => {
             const isToday =
+              day &&
               today.getFullYear() === year &&
               today.getMonth() === month &&
-              today.getDate() === dayNumber;
+              today.getDate() === day;
 
             return (
-              <Grid item xs={12 / 7} key={dayNumber}>
+              <Grid item xs={12 / 7} key={index}>
                 <Box
                   sx={{
-                    height: 80,
-                    border: "1px solid rgba(0,0,0,0.08)",
-                    p: 1,
+                    height: 90,
+                    border: "1px solid",
+                    borderColor: "divider",
                     display: "flex",
+                    alignItems: "flex-start",
                     justifyContent: "flex-end",
-                    bgcolor: isToday ? "primary.main" : "transparent",
-                    color: isToday ? "#000" : "inherit",
-                    transition: "0.2s",
-                    "&:hover": {
-                      bgcolor: isToday
-                        ? "primary.main"
-                        : "action.hover",
-                    },
+                    p: 1.5,
+                    bgcolor: isToday ? "primary.main" : "background.paper",
+                    color: isToday ? "primary.contrastText" : "text.primary",
                   }}
                 >
-                  <Typography fontWeight={600}>
-                    {dayNumber}
-                  </Typography>
+                  {day && (
+                    <Typography fontWeight={600}>
+                      {day}
+                    </Typography>
+                  )}
                 </Box>
               </Grid>
             );
