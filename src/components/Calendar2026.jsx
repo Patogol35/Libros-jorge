@@ -42,12 +42,6 @@ function getCalendar(year, month) {
   return cells;
 }
 
-const isSameDate = (y, m, d, date) =>
-  d &&
-  date.getFullYear() === y &&
-  date.getMonth() === m &&
-  date.getDate() === d;
-
 /* =========================
    COMPONENTE
 ========================= */
@@ -56,37 +50,33 @@ export default function Calendar2026() {
   const [selectedDay, setSelectedDay] = useState(null);
 
   const year = 2026;
-  const today = null;
   const calendar = getCalendar(year, month);
-
-  const dayName = today.toLocaleDateString("es-ES", { weekday: "long" });
-  const monthName = MONTHS[today.getMonth()];
 
   return (
     <Box>
       {/* TITULO */}
-<Box textAlign="center" mb={5}>
-  <Typography
-    variant="h3"
-    fontWeight={900}
-    sx={{
-      background: "linear-gradient(135deg,#1e40af,#2563eb)",
-      WebkitBackgroundClip: "text",
-      WebkitTextFillColor: "transparent",
-      letterSpacing: 1.2,
-    }}
-  >
-    Calendario
-  </Typography>
+      <Box textAlign="center" mb={5}>
+        <Typography
+          variant="h3"
+          fontWeight={900}
+          sx={{
+            background: "linear-gradient(135deg,#1e40af,#2563eb)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            letterSpacing: 1.2,
+          }}
+        >
+          Calendario
+        </Typography>
 
-  <Typography
-    textAlign="center"
-    color="text.secondary"
-    sx={{ mt: 1 }}
-  >
-    Autor · Jorge Patricio Santamaría Cherrez
-  </Typography>
-</Box>
+        <Typography
+          textAlign="center"
+          color="text.secondary"
+          sx={{ mt: 1 }}
+        >
+          Autor · Jorge Patricio Santamaría Cherrez
+        </Typography>
+      </Box>
 
       <Paper
         elevation={10}
@@ -97,7 +87,7 @@ export default function Calendar2026() {
           overflow: "hidden",
         }}
       >
-        {/* HEADER AZUL */}
+        {/* HEADER */}
         <Box
           sx={{
             background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
@@ -105,11 +95,11 @@ export default function Calendar2026() {
             p: 3,
           }}
         >
-          <Typography sx={{ textTransform: "capitalize", opacity: 0.9 }}>
-            {dayName} · {today.getDate()}
+          <Typography sx={{ opacity: 0.85 }}>
+            Año {year}
           </Typography>
           <Typography variant="h5" fontWeight={800}>
-            {monthName} {year}
+            {MONTHS[month]}
           </Typography>
         </Box>
 
@@ -176,7 +166,6 @@ export default function Calendar2026() {
               {calendar.map((day, index) => {
                 const col = index % 7;
                 const isWeekend = col >= 5;
-                const isToday = false;
                 const isSelected = day === selectedDay;
 
                 const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -206,15 +195,13 @@ export default function Calendar2026() {
                             cursor: "pointer",
                             bgcolor: isSelected
                               ? "#1e40af"
-                              : isToday
-                              ? "#2563eb"
                               : "transparent",
-                            color: isSelected || isToday
+                            color: isSelected
                               ? "#fff"
                               : isWeekend
                               ? "#64748b"
                               : "text.primary",
-                            fontWeight: isToday || isSelected ? 700 : 400,
+                            fontWeight: isSelected ? 700 : 400,
                             position: "relative",
                           }}
                         >
@@ -244,4 +231,4 @@ export default function Calendar2026() {
       </Paper>
     </Box>
   );
-          }
+        }
