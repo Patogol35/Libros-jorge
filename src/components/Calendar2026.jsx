@@ -4,9 +4,11 @@ import {
   Paper,
   Typography,
   IconButton,
+  Tooltip,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* =========================
    CONSTANTES
@@ -17,15 +19,21 @@ const MONTHS = [
   "Septiembre", "Octubre", "Noviembre", "Diciembre",
 ];
 
-// Semana inicia en lunes
 const DAYS = ["L", "M", "M", "J", "V", "S", "D"];
+
+// Días especiales (ejemplo)
+const SPECIAL_DAYS = {
+  "2026-01-01": "🎉 Año Nuevo",
+  "2026-05-24": "🎖️ Batalla de Pichincha",
+  "2026-12-25": "🎄 Navidad",
+};
 
 /* =========================
    LOGICA CALENDARIO
 ========================= */
 function getCalendar(year, month) {
-  const jsDay = new Date(year, month, 1).getDay(); // 0 = domingo
-  const firstDay = jsDay === 0 ? 6 : jsDay - 1;    // lunes = 0
+  const jsDay = new Date(year, month, 1).getDay();
+  const firstDay = jsDay === 0 ? 6 : jsDay - 1;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const cells = [];
@@ -35,49 +43,37 @@ function getCalendar(year, month) {
   return cells;
 }
 
+const isSameDate = (y, m, d, date) =>
+  d &&
+  date.getFullYear() === y &&
+  date.getMonth() === m &&
+  date.getDate() === d;
+
 /* =========================
    COMPONENTE
 ========================= */
 export default function Calendar2026() {
   const [month, setMonth] = useState(0);
+  const [selectedDay, setSelectedDay] = useState(null);
+
   const year = 2026;
   const today = new Date();
 
   const calendar = getCalendar(year, month);
 
-  const isToday = (day) =>
-    day &&
-    today.getFullYear() === year &&
-    today.getMonth() === month &&
-    today.getDate() === day;
-
   return (
     <Box>
-      {/* =========================
-          TÍTULO
-      ========================= */}
-      <Typography
-        variant="h3"
-        fontWeight={800}
-        textAlign="center"
-        mb={1}
-      >
+      {/* TITULO */}
+      <Typography variant="h3" fontWeight={800} textAlign="center" mb={1}>
         Calendario
       </Typography>
 
-      <Typography
-        textAlign="center"
-        color="text.secondary"
-        mb={4}
-      >
+      <Typography textAlign="center" color="text.secondary" mb={4}>
         Autor: Jorge Patricio Santamaría Cherrez
       </Typography>
 
-      {/* =========================
-          TARJETA CALENDARIO
-      ========================= */}
       <Paper
-        elevation={8}
+        elevation={10}
         sx={{
           maxWidth: 420,
           mx: "auto",
@@ -86,24 +82,17 @@ export default function Calendar2026() {
         }}
       >
         {/* HEADER AZUL */}
-        <Box
-          sx={{
-            bgcolor: "#1976d2", // azul MUI
-            color: "#fff",
-            p: 3,
-          }}
-        >
+        <Box sx={{ bgcolor: "#1976d2", color: "#fff", p: 3 }}>
           <Typography variant="caption" sx={{ opacity: 0.85 }}>
             {year}
           </Typography>
-
           <Typography variant="h4" fontWeight={800}>
             {DAYS[(today.getDay() + 6) % 7]}, {today.getDate()} de{" "}
             {MONTHS[today.getMonth()].slice(0, 3)}.
           </Typography>
         </Box>
 
-        {/* MES + FLECHAS */}
+        {/* MES */}
         <Box
           display="flex"
           alignItems="center"
@@ -124,7 +113,7 @@ export default function Calendar2026() {
           </IconButton>
         </Box>
 
-        {/* DÍAS DE LA SEMANA */}
+        {/* DIAS */}
         <Box
           px={2}
           sx={{
@@ -134,11 +123,11 @@ export default function Calendar2026() {
             mb: 1,
           }}
         >
-          {DAYS.map((d) => (
+          {DAYS.map((d, i) => (
             <Typography
               key={d}
               fontSize={12}
-              color="text.secondary"
+              color={i === 6 ? "error.main" : "text.secondary"}
             >
               {d}
             </Typography>
@@ -146,45 +135,95 @@ export default function Calendar2026() {
         </Box>
 
         {/* CALENDARIO */}
-        <Box
-          px={2}
-          pb={2}
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(7, 1fr)",
-            rowGap: 8,
-          }}
-        >
-          {calendar.map((day, i) => (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={month}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25 }}
+          >
             <Box
-              key={i}
+              px={2}
+              pb={2}
               sx={{
-                height: 48,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                display: "grid",
+                gridTemplateColumns: "repeat(7, 1fr)",
+                rowGap: 8,
               }}
             >
-              {day && (
-                <Box
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    bgcolor: isToday(day) ? "#1976d2" : "transparent",
-                    color: isToday(day) ? "#fff" : "text.primary",
-                    fontWeight: isToday(day) ? 700 : 400,
-                  }}
-                >
-                  {day}
-                </Box>
-              )}
+              {calendar.map((day, index) => {
+                const col = index % 7;
+                const isSunday = col === 6;
+                const isWeekend = col >= 5;
+                const isToday = isSameDate(year, month, day, today);
+                const isSelected = day === selectedDay;
+
+                const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                const special = SPECIAL_DAYS[key];
+
+                return (
+                  <Box
+                    key={index}
+                    sx={{
+                      height: 48,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {day && (
+                      <Tooltip title={special || ""}>
+                        <Box
+                          onClick={() => setSelectedDay(day)}
+                          sx={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: "50%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            bgcolor: isSelected
+                              ? "#0d47a1"
+                              : isToday
+                              ? "#1976d2"
+                              : "transparent",
+                            color: isSelected || isToday
+                              ? "#fff"
+                              : isSunday
+                              ? "error.main"
+                              : isWeekend
+                              ? "text.secondary"
+                              : "text.primary",
+                            fontWeight: isToday || isSelected ? 700 : 400,
+                            position: "relative",
+                          }}
+                        >
+                          {day}
+
+                          {/* Punto día especial */}
+                          {special && (
+                            <Box
+                              sx={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: "50%",
+                                bgcolor: "#ffb300",
+                                position: "absolute",
+                                bottom: 4,
+                              }}
+                            />
+                          )}
+                        </Box>
+                      </Tooltip>
+                    )}
+                  </Box>
+                );
+              })}
             </Box>
-          ))}
-        </Box>
+          </motion.div>
+        </AnimatePresence>
       </Paper>
     </Box>
   );
