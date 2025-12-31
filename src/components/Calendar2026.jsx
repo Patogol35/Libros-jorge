@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Box,
   Paper,
@@ -24,20 +24,6 @@ const MONTHS = [
 ];
 
 const DAYS = ["L", "M", "M", "J", "V", "S", "D"];
-
-/* =========================
-   FESTIVOS POR AÑO
-========================= */
-const SPECIAL_DAYS = {
-  2025: {
-    "01-01": "🎉 Año Nuevo",
-  },
-  2026: {
-    "01-01": "🎉 Año Nuevo",
-    "05-24": "🎖️ Batalla de Pichincha",
-    "12-25": "🎄 Navidad",
-  },
-};
 
 /* =========================
    LOGICA CALENDARIO
@@ -69,7 +55,7 @@ export default function Calendar() {
   const calendar = getCalendar(year, month);
 
   /* =========================
-     HEADER SOLO FECHA ACTUAL
+     HEADER (FECHA ACTUAL REAL)
   ========================= */
   const dayName = today.toLocaleDateString("es-ES", { weekday: "long" });
   const dayNumber = today.getDate();
@@ -77,7 +63,7 @@ export default function Calendar() {
   const yearToday = today.getFullYear();
 
   /* =========================
-     NAVEGACION MES/AÑO
+     NAVEGACION MES / AÑO
   ========================= */
   const prevMonth = () => {
     if (month === 0) {
@@ -101,6 +87,31 @@ export default function Calendar() {
 
   return (
     <Box>
+      {/* =========================
+          TITULO SUPERIOR
+      ========================= */}
+      <Box textAlign="center" mb={5}>
+        <Typography
+          variant="h3"
+          fontWeight={900}
+          sx={{
+            background: "linear-gradient(135deg,#1e40af,#2563eb)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            letterSpacing: 1.2,
+          }}
+        >
+          Calendario
+        </Typography>
+
+        <Typography color="text.secondary" sx={{ mt: 1 }}>
+          Autor · Jorge Patricio Santamaría Cherrez
+        </Typography>
+      </Box>
+
+      {/* =========================
+          CALENDARIO
+      ========================= */}
       <Paper
         elevation={10}
         sx={{
@@ -110,7 +121,7 @@ export default function Calendar() {
           overflow: "hidden",
         }}
       >
-        {/* HEADER */}
+        {/* HEADER FECHA ACTUAL */}
         <Box
           sx={{
             background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
@@ -214,16 +225,10 @@ export default function Calendar() {
                 const isSaturday = col === 5;
                 const isSunday = col === 6;
 
-                const special =
-                  day &&
-                  SPECIAL_DAYS[year]?.[
-                    `${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-                  ];
-
                 return (
                   <Box key={index} sx={{ height: 56, display: "flex", justifyContent: "center" }}>
                     {day && (
-                      <Tooltip title={special || ""}>
+                      <Tooltip title="Día del calendario">
                         <Box
                           onClick={() => setSelectedDay(day)}
                           sx={{
@@ -260,4 +265,4 @@ export default function Calendar() {
       </Paper>
     </Box>
   );
-        }
+          }
