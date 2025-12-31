@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -46,34 +46,47 @@ function getCalendar(year, month) {
   return cells;
 }
 
-const isSameDate = (y, m, d, date) =>
-  d &&
-  date.getFullYear() === y &&
-  date.getMonth() === m &&
-  date.getDate() === d;
-
 /* =========================
    COMPONENTE
 ========================= */
 export default function Calendar2026() {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
 
   const [month, setMonth] = useState(0);
   const [selectedDay, setSelectedDay] = useState(null);
 
+  // 👉 FECHA ACTUAL REAL (SOLO PARA EL TITULO)
+  const [today, setToday] = useState(new Date());
+
   const year = 2026;
-
-  // 👉 FECHA BASE DEL TITULO (SIEMPRE DIA 1 DEL MES)
-  const calendarDate = new Date(year, month, 1);
-
   const calendar = getCalendar(year, month);
 
-  const dayName = calendarDate.toLocaleDateString("es-ES", {
-    weekday: "long",
-  });
+  /* =========================
+     ACTUALIZA SOLO AL CAMBIAR EL DIA
+  ========================= */
+  useEffect(() => {
+    const now = new Date();
 
-  const monthName = MONTHS[month];
+    const nextMidnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+      0, 0, 1
+    );
+
+    const timeout = nextMidnight.getTime() - now.getTime();
+
+    const timer = setTimeout(() => {
+      setToday(new Date());
+    }, timeout);
+
+    return () => clearTimeout(timer);
+  }, [today]);
+
+  const dayName = today.toLocaleDateString("es-ES", { weekday: "long" });
+  const dayNumber = today.getDate();
+  const monthNameToday = MONTHS[today.getMonth()];
+  const yearToday = today.getFullYear();
 
   return (
     <Box>
@@ -107,7 +120,7 @@ export default function Calendar2026() {
           bgcolor: "background.paper",
         }}
       >
-        {/* HEADER */}
+        {/* HEADER — SOLO FECHA ACTUAL */}
         <Box
           sx={{
             background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
@@ -116,10 +129,10 @@ export default function Calendar2026() {
           }}
         >
           <Typography sx={{ textTransform: "capitalize", opacity: 0.9 }}>
-            {dayName} · 1
+            {dayName} · {dayNumber}
           </Typography>
           <Typography variant="h5" fontWeight={800}>
-            {monthName} {year}
+            {monthNameToday} {yearToday}
           </Typography>
         </Box>
 
@@ -206,7 +219,6 @@ export default function Calendar2026() {
                 const col = index % 7;
                 const isSaturday = col === 5;
                 const isSunday = col === 6;
-                const isSelected = day === selectedDay;
 
                 const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
                 const special = SPECIAL_DAYS[key];
@@ -226,16 +238,15 @@ export default function Calendar2026() {
                             alignItems: "center",
                             justifyContent: "center",
                             cursor: "pointer",
-                            bgcolor: isSelected
-                              ? theme.palette.primary.dark
-                              : "transparent",
-                            color: isSelected
-                              ? "#fff"
-                              : isSunday
-                              ? theme.palette.error.main
-                              : isSaturday
-                              ? theme.palette.primary.main
-                              : theme.palette.text.primary,
+                            bgcolor: selectedDay === day ? theme.palette.primary.dark : "transparent",
+                            color:
+                              selectedDay === day
+                                ? "#fff"
+                                : isSunday
+                                ? theme.palette.error.main
+                                : isSaturday
+                                ? theme.palette.primary.main
+                                : theme.palette.text.primary,
                             transition: "all .2s",
                             "&:hover": {
                               bgcolor: theme.palette.action.hover,
@@ -256,4 +267,4 @@ export default function Calendar2026() {
       </Paper>
     </Box>
   );
-        }
+}
